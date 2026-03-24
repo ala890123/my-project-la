@@ -5,9 +5,217 @@ on:
     types: [created]
 
 jobs:
-  opencode:
+  generate-dashboard:
+    if: contains(github.event.comment.body, '/opencode')
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
-      - name: Run OpenCode
-        run: echo "OpenCode triggered"
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate parking dashboard page
+        run: |
+          cat > index.html <<'EOF'
+          <!DOCTYPE html>
+          <html lang="zh-CN">
+          <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>停车场大屏</title>
+            <style>
+              * { box-sizing: border-box; margin: 0; padding: 0; }
+              body {
+                font-family: Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+                background: linear-gradient(180deg, #07111f 0%, #0b1f38 100%);
+                color: #e8f3ff;
+                min-height: 100vh;
+              }
+              .container {
+                width: 100%;
+                min-height: 100vh;
+                padding: 24px;
+              }
+              .header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 24px;
+                padding: 20px 24px;
+                border: 1px solid rgba(77, 163, 255, 0.35);
+                border-radius: 18px;
+                background: rgba(10, 28, 52, 0.75);
+                box-shadow: 0 0 30px rgba(30, 144, 255, 0.12);
+              }
+              .title {
+                font-size: 32px;
+                font-weight: 700;
+                letter-spacing: 2px;
+              }
+              .time {
+                font-size: 16px;
+                color: #8ec5ff;
+              }
+              .grid {
+                display: grid;
+                grid-template-columns: 1.2fr 1fr 1fr;
+                gap: 20px;
+              }
+              .card {
+                background: rgba(10, 28, 52, 0.82);
+                border: 1px solid rgba(77, 163, 255, 0.28);
+                border-radius: 18px;
+                padding: 20px;
+                box-shadow: 0 0 24px rgba(30, 144, 255, 0.1);
+              }
+              .card h2 {
+                font-size: 18px;
+                color: #9fd0ff;
+                margin-bottom: 16px;
+              }
+              .big-number {
+                font-size: 44px;
+                font-weight: 700;
+                color: #ffffff;
+                margin-bottom: 8px;
+              }
+              .sub {
+                color: #8aa9c7;
+                font-size: 14px;
+              }
+              .stats {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+              }
+              .mini {
+                background: rgba(255,255,255,0.03);
+                border: 1px solid rgba(126, 191, 255, 0.18);
+                border-radius: 14px;
+                padding: 16px;
+              }
+              .mini-title {
+                color: #9fd0ff;
+                font-size: 14px;
+                margin-bottom: 10px;
+              }
+              .mini-value {
+                font-size: 28px;
+                font-weight: 700;
+              }
+              .parking-map {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 12px;
+                margin-top: 10px;
+              }
+              .slot {
+                height: 64px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 700;
+                border: 1px solid rgba(255,255,255,0.15);
+              }
+              .free { background: rgba(33, 213, 137, 0.15); color: #57f0a9; }
+              .busy { background: rgba(41, 151, 255, 0.18); color: #78beff; }
+              .warn { background: rgba(255, 183, 77, 0.16); color: #ffc76b; }
+              .footer {
+                margin-top: 20px;
+                color: #6f97bb;
+                font-size: 13px;
+                text-align: center;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <div class="title">智慧停车运营大屏</div>
+                <div class="time">数据更新时间：实时同步</div>
+              </div>
+
+              <div class="grid">
+                <div class="card">
+                  <h2>车场概览</h2>
+                  <div class="big-number">1,286</div>
+                  <div class="sub">总车位数</div>
+
+                  <div class="stats" style="margin-top: 18px;">
+                    <div class="mini">
+                      <div class="mini-title">空闲车位</div>
+                      <div class="mini-value">342</div>
+                    </div>
+                    <div class="mini">
+                      <div class="mini-title">已占车位</div>
+                      <div class="mini-value">944</div>
+                    </div>
+                    <div class="mini">
+                      <div class="mini-title">今日入场</div>
+                      <div class="mini-value">2,154</div>
+                    </div>
+                    <div class="mini">
+                      <div class="mini-title">今日离场</div>
+                      <div class="mini-value">2,006</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card">
+                  <h2>实时车位状态</h2>
+                  <div class="parking-map">
+                    <div class="slot free">A01</div>
+                    <div class="slot busy">A02</div>
+                    <div class="slot busy">A03</div>
+                    <div class="slot free">A04</div>
+                    <div class="slot warn">B01</div>
+                    <div class="slot busy">B02</div>
+                    <div class="slot free">B03</div>
+                    <div class="slot busy">B04</div>
+                    <div class="slot free">C01</div>
+                    <div class="slot busy">C02</div>
+                    <div class="slot free">C03</div>
+                    <div class="slot warn">C04</div>
+                  </div>
+                </div>
+
+                <div class="card">
+                  <h2>运营指标</h2>
+                  <div class="stats">
+                    <div class="mini">
+                      <div class="mini-title">平均周转率</div>
+                      <div class="mini-value">78%</div>
+                    </div>
+                    <div class="mini">
+                      <div class="mini-title">异常告警</div>
+                      <div class="mini-value">12</div>
+                    </div>
+                    <div class="mini">
+                      <div class="mini-title">AVP任务</div>
+                      <div class="mini-value">86</div>
+                    </div>
+                    <div class="mini">
+                      <div class="mini-title">精致泊车</div>
+                      <div class="mini-value">124</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="footer">
+                GitHub Actions 自动生成的基础停车场大屏页面
+              </div>
+            </div>
+          </body>
+          </html>
+          EOF
+
+      - name: Commit generated page
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Generate parking dashboard page from issue comment" || echo "No changes to commit"
+          git push
